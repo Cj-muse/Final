@@ -19,12 +19,14 @@ echo partition=$PARTITION sector=$SECTOR offset=$OFFSET
 
 sudo mount -o loop,offset=$OFFSET $VDISK /mnt
 
-echo compiling $1.c .....
+echo compiling $1.c init.c login.c .....
 as86 -o u.o u.s
 bcc -c -ansi $1.o $1.c
+bcc -c -ansi init.o init.c
+bcc -c -ansi login.o login.c
 
 echo linking .......
-ld86 u.o $1.o mtxlib /usr/lib/bcc/libc.a #2> /dev/null 
+ld86 u.o $1.o init.o login.o mtxlib /usr/lib/bcc/libc.a #2> /dev/null 
 
 echo copying $1 into $VDISK/bin/$1
 

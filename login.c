@@ -18,6 +18,7 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
                 // Control-C KILLs other procs on this tty but not the main sh
 
 	while(1){
+	///etc/passwords
 		//1. show login:           to stdout
    	//2. read user nmae        from stdin
 	   //3. show passwd:
