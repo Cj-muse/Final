@@ -1,5 +1,6 @@
 int pid, child, status;
 int stdin, stdout;
+int s0pid, s1pid;
 
 #include "ucode.c"  //<========== AS POSTED on class website
 
@@ -18,22 +19,27 @@ main(int argc, char *argv[])
    child = fork();
    
    if (child)
-	   parent();
+   {
+      parent();
+	}
 	else             // login task
+   {
    	login();
+   }
 }       
 
 int login()
 {
-	exec("login /dev/tty0");
+   exec("login /dev/tty0");
 }
       
 int parent()
-{
-   int s0pid, s1pid;
-   
+{   
    // Set up serial ports
    s0pid = fork();  
+   printf("s0pid after fork: %d\n",s0pid);
+   //printf("");
+   
    if(s0pid)
    {
       // Parent
@@ -45,6 +51,7 @@ int parent()
       else
       {
          // Child: open the first termial ttyS1
+         // set up stdin stdout, and execute login program
          close(0);
          close(1);
          stdin = open("/dev/ttyS1", O_RDONLY);
@@ -54,7 +61,8 @@ int parent()
    }
    else
    {
-      // Child: open the second termial ttyS0
+      // Child: open the second termial ttyS0,
+      // set up stdin stdout, and execute login program
       close(0);
       close(1);
       stdin = open("/dev/ttyS0", O_RDONLY);
@@ -66,7 +74,7 @@ int parent()
 	{
 		printf("CMINIT : parent waiting ...\n");
 
-   	pid = wait(&status);
+   	pid = wait(&status);  // wait for child to die
 
    	if (pid == child)
    	{
