@@ -26,7 +26,7 @@ bcc -c -ansi init.o init.c
 bcc -c -ansi login.o login.c
 
 echo linking .......
-ld86 u.o $1.o init.o login.o mtxlib /usr/lib/bcc/libc.a #2> /dev/null 
+ld86 u.o $1.o init.o login.o mtxlib /usr/lib/bcc/libc.a 
 
 echo copying $1 into $VDISK/bin/$1
 
