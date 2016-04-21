@@ -45,19 +45,26 @@ void getUsersFromFile()
       {
          // then split each line by ":" filling the user array with the fields
          printf("field: %s \n", field);
+         //printf("i: %d\n",i);
          field = strtok(0, ":");
          switch(i)
          {
             case 1: strcpy(users[i]->password, field); break;
             case 2: users[i]->gid = field;             break;
             case 3: users[i]->uid = field;             break;
-            case 4: strcpy(users[i]->fullname, field); break;
+            
+            case 4: 
+               printf("case 4\n"); 
+               strcpy(users[i]->fullname, field); 
+               break;
+            
             case 5: strcpy(users[i]->homedir, field);  break;
             case 6: strcpy(users[i]->program, field);  break;
             default: break;
-         }        
-         i++;
+         }       
+         //printf("i: %d\n",i);
       }
+       i++;
   }
 
   
