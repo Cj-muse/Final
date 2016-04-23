@@ -26,51 +26,77 @@ USER * users[10];
 
 void getUsersFromFile()
 {
-   int i;
-   char *line, *field;
-   // this function uses the file descriptor fd 
-   // and reads user information into the users array
-   // both are globals
-   
-   //first split file by lines to get seperate users
-  while(read(fd, buffer, 256))
-  {
-      line = strtok(buffer, "\n");
-      printf("line: %s \n", line);
-      
-      field = strtok(line, ":");
-      strcpy(users[i]->username, field);
-      i=1;
-      while(field)
-      {
-         // then split each line by ":" filling the user array with the fields
-         printf("field: %s \n", field);
-         //printf("i: %d\n",i);
-         field = strtok(0, ":");
-         switch(i)
-         {
-            case 1: strcpy(users[i]->password, field); break;
-            case 2: users[i]->gid = field;             break;
-            case 3: users[i]->uid = field;             break;
-            
-            case 4: 
-               printf("case 4\n"); 
-               strcpy(users[i]->fullname, field); 
-               break;
-            
-            case 5: strcpy(users[i]->homedir, field);  break;
-            case 6: strcpy(users[i]->program, field);  break;
-            default: break;
-         }       
-         //printf("i: %d\n",i);
-      }
-       i++;
-  }
+	char *string;
+	char *line;
+	char *field;
+	int i = 0, j = 0; 
 
-  
+	while (read(fd, buffer, 256))// still bytes to be read
+	{
+		string = buffer;
+		//parse whats been read in into seperate lines
+		 line  = strchr(string, '\n');
+	
+	    while (line != 0)
+	    {
+	        // String to scan is in string..
+	        *line++ = '\0';
+	        printf("a = %s\n", string);
+	        field = strtok(string, ":");
+	        
+	        while (field != 0)
+	        {
+	            printf("field = %s\n", field);
+	            switch(j)
+         		{
+            		case 1: strcpy(users[i]->password, field); break;
+            		case 2: users[i]->gid = field;             break;
+            		case 3: users[i]->uid = field;             break;
+            		case 4: printf("case 4\n");strcpy(users[i]->fullname, field);break;
+            		case 5: strcpy(users[i]->homedir, field);  break;
+            		case 6: strcpy(users[i]->program, field);  break;
+            		default: break;
+         		}	
+         		printf("users[%d]: %d\n",i, users[i]);
+         		printf("users[%d]->username: %s", i, users[i]->username);
+	            field = strtok(0, ":");
+	            j++;
+	        }
+	        string = line;
+	        line = strchr(string, '\n');
+	        i++;
+	    }
+	}
+}   
 
-   
+void initUsers()
+{
+	int i = 0;
+		
+	for(i = 0; i<10; i++)
+	{
+		users[i] = (USER*)malloc(sizeof(USER));
+	}
 }
+
+void printUsers()
+{
+	int i = 0;
+	printf("users[%d]: %d\n",i, users[i]);
+	while(users[i])
+	{
+		printf("users[%d]\n",i);
+		printf("username: %s\n", users[i]->username);
+		printf("password: %s\n", users[i]->password);
+		printf("gid: %d\n", users[i]->gid);
+		printf("uid: %d\n", users[i]->uid);
+		printf("fullname: %s\n", users[i]->fullname);
+		printf("homedir: %s\n", users[i]->homedir);
+		printf("program: %s\n", users[i]->program);
+		i++;
+	}
+}
+
 
 main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
 {
@@ -78,11 +104,7 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
 	tty =  argv[1];
 	
 	//initialize user array
-	for(i = 0; i < 10; i++)
-	{
-		users[i]->gid = 0;
-		users[i]->uid = 0;
-	}
+	initUsers();
 	
 	close(0); close(1); close(2); // login process may run on different terms
 
@@ -106,11 +128,14 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
       gets(input_password);    		//4. read user passwd
       
      	// open the authentication file for reading 
-     	fd = open("/etc/passwd", O_RDONLY);
+     	//fd = open("/etc/passwd", O_RDONLY);
+     	fd = open("/bin/accounts", O_RDONLY);
      	
      	//read in each credetial and check it against what the user entered
      	//  username:password:gid:uid:fullname:HOMEDIR:program
       getUsersFromFile();
+      
+      printUsers();
 
      	//5. verify user name and passwd from /etc/passwd file
      	while (users[i])
