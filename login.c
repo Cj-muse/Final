@@ -1,4 +1,6 @@
 #include "ucode.c"
+
+#define NUMBERUSERS 10
 char *tty;
 int stdin, stdout;
 char input_username[32], input_password[32];
@@ -22,7 +24,8 @@ typedef struct user{
    
 }USER;
 
-USER * users[10];
+USER users[10];
+USER current_user;
 
 void getUsersFromFile()
 {
@@ -35,31 +38,30 @@ void getUsersFromFile()
 	{
 		string = buffer;
 		//parse whats been read in into seperate lines
-		 line  = strchr(string, '\n');
+		line  = strchr(string, '\n');
 	
-	    while (line != 0)
-	    {
+	   while (line != 0)
+	   {
 	        // String to scan is in string..
 	        *line++ = '\0';
-	        printf("a = %s\n", string);
+	        //printf("a = %s\n", string);
 	        field = strtok(string, ":");
-	        
+        	  strcpy(users[i].username, field); 	        
+        		
 	        while (field != 0)
 	        {
-	            printf("field = %s\n", field);
+	            //printf("field = %s\n", field);
 	            switch(j)
          		{
-            		case 1: strcpy(users[i]->password, field); break;
-            		case 2: users[i]->gid = field;             break;
-            		case 3: users[i]->uid = field;             break;
-            		case 4: printf("case 4\n");strcpy(users[i]->fullname, field);break;
-            		case 5: strcpy(users[i]->homedir, field);  break;
-            		case 6: strcpy(users[i]->program, field);  break;
+            		case 1: strcpy(users[i].password, field); break;
+            		case 2: users[i].gid = field;             break;
+            		case 3: users[i].uid = field;             break;
+            		case 4: strcpy(users[i].fullname, field); break;
+            		case 5: strcpy(users[i].homedir, field);  break;
+            		case 6: strcpy(users[i].program, field);  break;
             		default: break;
          		}	
-         		printf("users[%d]: %d\n",i, users[i]);
-         		printf("users[%d]->username: %s", i, users[i]->username);
-	            field = strtok(0, ":");
+         		field = strtok(0, ":");
 	            j++;
 	        }
 	        string = line;
@@ -69,32 +71,52 @@ void getUsersFromFile()
 	}
 }   
 
+//checks the username and password that were input
+//the user passed in 
+int authenticateUser()
+{
+   int i = 0;
+   
+   for(i = 0; i< NUMBERUSERS; i++)
+   {
+      if ( strcmp(users[i].username, input_username) == 0
+      && strcmp(users[i].password, input_password) == 0)
+      {
+         //valid user
+         current_user = users[i];
+         return 1;
+      }
+   }
+   return 0;
+}
+
 void initUsers()
 {
 	int i = 0;
 		
 	for(i = 0; i<10; i++)
 	{
-		users[i] = (USER*)malloc(sizeof(USER));
+		strcpy(users[i].username, "x");
+		strcpy(users[i].password, "x");
+		users[i].gid = 0;
+		users[i].uid = 0;
+		strcpy(users[i].fullname,"");
+		strcpy(users[i].homedir, "");
+		strcpy(users[i].program, "");		
 	}
+	printf("init done\n");
 }
 
-void printUsers()
+void printCurrentUser()
 {
-	int i = 0;
-	printf("users[%d]: %d\n",i, users[i]);
-	while(users[i])
-	{
-		printf("users[%d]\n",i);
-		printf("username: %s\n", users[i]->username);
-		printf("password: %s\n", users[i]->password);
-		printf("gid: %d\n", users[i]->gid);
-		printf("uid: %d\n", users[i]->uid);
-		printf("fullname: %s\n", users[i]->fullname);
-		printf("homedir: %s\n", users[i]->homedir);
-		printf("program: %s\n", users[i]->program);
-		i++;
-	}
+   printf("----------User Info----------\n");
+	printf("username: %s\n", current_user.username);
+	printf("password: %s\n", current_user.password);
+	printf("gid: %d\n", current_user.gid);
+	printf("uid: %d\n", current_user.uid);
+	printf("fullname: %s\n", current_user.fullname);
+	printf("homedir: %s\n", current_user.homedir);
+	printf("program: %s\n", current_user.program);
 }
 
 
@@ -135,22 +157,29 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
      	//  username:password:gid:uid:fullname:HOMEDIR:program
       getUsersFromFile();
       
-      printUsers();
-
+      //close file since it is no longer needed
+      //close(fd);
+     
      	//5. verify user name and passwd from /etc/passwd file
-     	while (users[i])
-     	{
-     	   if ( strcmp(users[i]->username, input_username) == 0 && 
-     	        strcmp(users[i]->password, input_password) == 0)
-     	   {
-     	      //Successfull login.
-     	      //setuid to user uid.
-         	//chdir to user HOME directory.
-         	//exec to the program in users's account
-         	return;
-     	   }
-     	   i++;
+      if (authenticateUser())
+      {
+     	   //Successfull login.
+         printf("Success\n");
+         printCurrentUser();
+        
+         //setuid to user uid.
+         chuid(current_user.uid, current_user.gid);
+         printf("Success1\n");
+           
+         //chdir to user HOME directory.
+         chdir(current_user.homedir);
+         printf("Success2\n");
+           
+         //exec to the program in users's account
+         exec(current_user.program);
+         printf("Success3\n");
+         return;
      	}
-     	printf("login failed, try again \n");
+    	printf("login failed, try again \n");
    }
 }
