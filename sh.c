@@ -4,7 +4,7 @@
 
 #include "ucode.c"
 
-
+int status;
 char cmd[256];
 char *pipe_commands[16];
 int hasPipe;
@@ -30,6 +30,16 @@ int main(int argc, char *argv[])
 			exit(0);
 		}
 		
+		// for binary executable command
+ 		pid = fork(); // fork a child sh process
+ 		if (pid)
+ 		{ 
+ 			// parent sh
+			if (!symbol()) // assume at most one & for main sh
+ 				pid = wait(&status);
+			continue; // main sh does not wait if &
+ 		}
+		
 				
 		// check for pipes
 		//checkForPipes();		
@@ -40,6 +50,21 @@ int main(int argc, char *argv[])
 	 	doCommand(&cmd); 
 	}
 	exit(0);
+	return 0;
+}
+
+int symbol()
+{
+	int i;
+	
+	while(i < 256)
+	{
+		if(cmd[i] == '&')
+		{
+			return 1;
+		}
+		i++;
+	}
 	return 0;
 }
 
