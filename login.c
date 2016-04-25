@@ -176,7 +176,8 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
          printf("Success2\n");
            
          //exec to the program in users's account
-         exec(current_user.program);
+         //exec(current_user.program);
+         exec("/bin/sh");
          printf("Success3\n");
          return;
      	}
