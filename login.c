@@ -158,7 +158,7 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
       getUsersFromFile();
       
       //close file since it is no longer needed
-      //close(fd);
+      close(fd);
      
      	//5. verify user name and passwd from /etc/passwd file
       if (authenticateUser())

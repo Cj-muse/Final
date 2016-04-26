@@ -19,14 +19,15 @@ int main(int argc, char *argv[])
 {
 	int pid, i = 0;
 
-	while(1){
+	while(1)
+	{
 		printf("Conner's_Shell:>>  ");
 		
 		//get the user command
 		gets(cmd);
 		
-		if(strcmp(cmd, "logout")==0){
-			//logout
+		if(strcmp(cmd, "logout")==0)
+		{
 			exit(0);
 		}
 		
