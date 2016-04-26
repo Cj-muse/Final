@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 		
 		if(strcmp(cmd, "logout")==0)
 		{
+		   printf("logging out...\n");
 			exit(0);
 		}
 		

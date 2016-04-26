@@ -179,7 +179,7 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
          //exec(current_user.program);
          exec("/bin/sh");
          printf("Success3\n");
-         return;
+         exit(0);
      	}
     	printf("login failed, try again \n");
    }
