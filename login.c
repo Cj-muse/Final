@@ -42,32 +42,37 @@ void getUsersFromFile()
 	
 	   while (line != 0)
 	   {
-	        // String to scan is in string..
-	        *line++ = '\0';
-	        //printf("a = %s\n", string);
-	        field = strtok(string, ":");
-        	  strcpy(users[i].username, field); 	        
-        		
-	        while (field != 0)
-	        {
-	            //printf("field = %s\n", field);
-	            switch(j)
-         		{
-            		case 1: strcpy(users[i].password, field); break;
-            		case 2: users[i].gid = field;             break;
-            		case 3: users[i].uid = field;             break;
-            		case 4: strcpy(users[i].fullname, field); break;
-            		case 5: strcpy(users[i].homedir, field);  break;
-            		case 6: strcpy(users[i].program, field);  break;
-            		default: break;
-         		}	
-         		field = strtok(0, ":");
-	            j++;
-	        }
-	        string = line;
-	        line = strchr(string, '\n');
-	        i++;
-	    }
+	   	//reset field iterator
+	   	j=0;
+	      // String to scan is in string..
+	      *line++ = '\0';
+	        
+	      //printf("a = %s\n", string);
+	      field = strtok(string, ":");
+      	strcpy(users[i].username, field); 	        
+       		
+			while (field != 0)
+	      {
+				printf("field = %s\n", field);
+				printf("j= %d\n",j);
+				switch(j)
+				{
+					case 1: strcpy(users[i].password, field); break;
+            	case 2: users[i].gid = field;             break;
+            	case 3: users[i].uid = field;             break;
+            	case 4: strcpy(users[i].fullname, field); break;
+            	case 5: strcpy(users[i].homedir, field);  break;
+            	case 6: strcpy(users[i].program, field);  break;
+            	default: break;
+         	}	
+         	field = strtok(0, ":");
+	         j++;
+	      }
+	        
+	      string = line;
+	      line = strchr(string, '\n');
+	      i++;
+		}
 	}
 }   
 
@@ -109,7 +114,7 @@ void initUsers()
 
 void printCurrentUser()
 {
-   printf("----------User Info----------\n");
+	printf("----------User Info----------\n");
 	printf("username: %s\n", current_user.username);
 	printf("password: %s\n", current_user.password);
 	printf("gid: %d\n", current_user.gid);
@@ -165,8 +170,8 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
       {
      	   //Successfull login.
          printf("Success\n");
-         printCurrentUser();
-        
+        	printCurrentUser();
+        	
          //setuid to user uid.
          chuid(current_user.uid, current_user.gid);
          printf("Success1\n");
@@ -179,8 +184,12 @@ main(int argc, char *argv[])   // invoked by exec("login /dev/ttyxx")
          //exec(current_user.program);
          exec("/bin/sh");
          printf("Success3\n");
-         exit(0);
+         //exit(0);
      	}
-    	printf("login failed, try again \n");
+     	else
+     	{
+    		printf("login failed, try again \n");
+    	}
    }
+   exit(0);
 }

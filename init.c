@@ -36,10 +36,7 @@ int login()
 int parent()
 {   
    // Set up serial ports
-   s0pid = fork();  
-   printf("s0pid after fork: %d\n",s0pid);
-   //printf("");
-   
+   s0pid = fork();     
    if(s0pid)
    {
       // Parent
@@ -69,7 +66,7 @@ int parent()
       stdout = open("/dev/ttyS0", O_WRONLY);
       exec("login /dev/ttyS0");
    }
-
+	
 	while(1)
 	{
 		printf("CMINIT : parent waiting ...\n");
@@ -83,7 +80,8 @@ int parent()
          child = fork();
          if(child)
          {
-            parent();
+         	continue;
+            //parent();
          }
          else
          {

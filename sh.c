@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
 		{
 		   printf("logging out...\n");
 			exit(0);
+			printf("should not be seeing this\n");
 		}
 		
 		// for binary executable command
