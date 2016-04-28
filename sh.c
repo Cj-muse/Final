@@ -117,11 +117,8 @@ int doCommand(char *cmdLine)
    
    redirection = doIoRedirect(cmdLine);
    
-   if (redirection)
-   {
-      
-   }
-   else
+   // if redirection occured then exec has already been called
+   if (!redirection) 
    {
 	   exec(cmdLine);
 	}
