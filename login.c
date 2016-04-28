@@ -53,8 +53,8 @@ void getUsersFromFile()
        		
 			while (field != 0)
 	      {
-				printf("field = %s\n", field);
-				printf("j= %d\n",j);
+				//printf("field = %s\n", field);
+				//printf("j= %d\n",j);
 				switch(j)
 				{
 					case 1: strcpy(users[i].password, field); break;

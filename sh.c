@@ -1,8 +1,9 @@
+#include "ucode.c"
+#include "redirection.c"
+
 #define FILEOUT 1
 #define FILEIN 2
 #define FILEAPPEND 3
-
-#include "ucode.c"
 
 int status;
 char cmd[256];
@@ -104,12 +105,26 @@ int scanForPipes(char *cmdLine)
 	// cmdLine = cmd1 ==> head=cmd1, tail=null; return 0;
 }
 
-int doIoRedirect()
-{}
+int doIoRedirect(char *line)
+{
+   scanForRedirection(line);
+}
 
 int doCommand(char *cmdLine)
 {
-	exec(cmdLine);
+   int redirection;
+   
+   
+   redirection = doIoRedirect(cmdLine);
+   
+   if (redirection)
+   {
+      
+   }
+   else
+   {
+	   exec(cmdLine);
+	}
 }
 
 
