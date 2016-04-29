@@ -36,75 +36,65 @@ char *reappendParsedLine(char **parsedLine)
 	return line;
 }
 
-int redirect_stdin(char **args, int iterator)
+int redirect_std(char **args, int iterator)
 {
-	int fileHandle;
+	int fileHandle = -1;
 	
-	close(0);	
-	fileHandle = open(args[iterator], O_RDONLY);
-	REDIRECT_TYPE = 1;		
+	printf("attempting to open: %s\n",args[iterator]);
+	printf("iterator -1: %s\n",args[iterator - 1]);
+	
+	if (strcmp(args[iterator - 1],"<") == 0)
+	{		
+		close(0);	
+		fileHandle = open(args[iterator], O_RDONLY);
+	}
+	else if (strcmp(args[iterator - 1],">") == 0)
+	{
+		close(1);
+		//, S_IWUSR | S_IRUSR not available in mtx
+		fileHandle = open(args[iterator], O_WRONLY | O_CREAT); 
+	}
+	else
+	{
+		close(1);	
+		fileHandle = open(args[iterator], O_WRONLY | O_APPEND | O_CREAT);
+	}
+		
 	return fileHandle;
 }
 
-int redirect_stdout(char **args, int iterator)
-{
-	int fileHandle;
-	
-	close(1);
-	//, S_IWUSR | S_IRUSR not available in mtx
-	fileHandle = open(args[iterator], O_WRONLY | O_CREAT); 
-	REDIRECT_TYPE = 2;
-   return fileHandle;	
-}
-
-int redirect_stdout_append(char **args, int iterator)
-{
-	int fileHandle;
-	
-	close(1);
-	fileHandle = open(args[iterator], O_WRONLY | O_APPEND | O_CREAT);
-	REDIRECT_TYPE = 3;	
-	return fileHandle;
-}
 
 int doRedirection(char **parsedLine)
 {
 	int i = 0;
 	char *line;
-	int fd = 0;
+	int fd = -1;
 	
 	printf("made it this far\n");
 	
 	while(parsedLine[i])
 	{
-		if (strcmp(parsedLine[i],"<") == 0)
+		printf("parsedLine[i]: %s\n", parsedLine[i]);
+		if (strcmp(parsedLine[i],"<") == 0 || strcmp(parsedLine[i],">") == 0 
+			|| strcmp(parsedLine[i],">>") == 0)
 		{
-			fd = redirect_stdin(parsedLine, i+1);		
-		}
-		else if (strcmp(parsedLine[i],">") == 0)
-		{
-			fd = redirect_stdout(parsedLine, i+1);
-		}
-		else if (strcmp(parsedLine[i],">>") == 0)
-		{
-			fd = redirect_stdout_append(parsedLine, i+1);
-		}
-		if (fd) // redirect has occured
-		{		   
-		   dup(fd);
-		   
-		   exec(line);
+			fd = redirect_std(parsedLine, i+1);
+		
+			printf("fd = %d\n", fd);
+			if (fd != -1) // redirect has occured
+			{		   
+				//about to 
+			   //dup(fd);
+			   line = reappendParsedLine(parsedLine);
+			   exec(line);
+			}
 		}
 		i++;
 	}
-	
-	line = reappendParsedLine(parsedLine);
-	
+		
 	//exec(line);
 }
 
-void restablishStandardIO()
-{}
 
 int scanForRedirection(char *line)
 {
