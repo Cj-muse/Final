@@ -1,12 +1,12 @@
 
 //int stdin, stdout, stderr;
 int 	REDIRECT_TYPE = 0;
-
+char *array[10];
 
 char **parseRedirectionOnSpaces(char *line)
 {
    char *token;
-   char *array[10];
+
    int i = 0;
    
    //split line on spaces
@@ -18,7 +18,7 @@ char **parseRedirectionOnSpaces(char *line)
       array[i] = strtok(0, " "); 
       i++;
    }
-
+   
    return array;
 }
 
@@ -29,76 +29,78 @@ char *reappendParsedLine(char **parsedLine)
 	
 	while(parsedLine[i])
 	{
-		printf("parsedLine[%d]: %s \n", i, &(*parsedLine)[i]);
-		while(parsedLine[i][j])
-		{
-			printf("parsedLine[%d][%d] = %c \n", i, j, parsedLine[i][j]);
-			line[k] = parsedLine[i][j];
-			printf("line[%d] = %c\n", k, line[k]);
-			k++;
-			j++;
-		}
-		j = 0;
-		i++;
+	   strcat(line, parsedLine[i]);	   
 	}
+	printf("line: %s\n", line);  
+	
 	return line;
 }
 
-void redirect_stdin(char **args, int iterator)
+int redirect_stdin(char **args, int iterator)
 {
 	int fileHandle;
 	
 	close(0);	
 	fileHandle = open(args[iterator], O_RDONLY);
 	REDIRECT_TYPE = 1;		
+	return fileHandle;
 }
 
-void redirect_stdout(char **args, int iterator)
+int redirect_stdout(char **args, int iterator)
 {
 	int fileHandle;
 	
 	close(1);
 	//, S_IWUSR | S_IRUSR not available in mtx
 	fileHandle = open(args[iterator], O_WRONLY | O_CREAT); 
-	REDIRECT_TYPE = 2;	
+	REDIRECT_TYPE = 2;
+   return fileHandle;	
 }
 
-void redirect_stdout_append(char **args, int iterator)
+int redirect_stdout_append(char **args, int iterator)
 {
 	int fileHandle;
 	
 	close(1);
 	fileHandle = open(args[iterator], O_WRONLY | O_APPEND | O_CREAT);
 	REDIRECT_TYPE = 3;	
+	return fileHandle;
 }
 
 int doRedirection(char **parsedLine)
 {
 	int i = 0;
 	char *line;
+	int fd = 0;
 	
 	printf("made it this far\n");
-	//printf("parsedLine[0] = %s\n", parsedLine[0]);
 	
 	while(parsedLine[i])
 	{
 		if (strcmp(parsedLine[i],"<") == 0)
 		{
-			redirect_stdin(parsedLine, i+1);		
+			fd = redirect_stdin(parsedLine, i+1);		
 		}
 		else if (strcmp(parsedLine[i],">") == 0)
 		{
-			redirect_stdout(parsedLine, i+1);
+			fd = redirect_stdout(parsedLine, i+1);
 		}
 		else if (strcmp(parsedLine[i],">>") == 0)
 		{
-			redirect_stdout_append(parsedLine, i+1);
+			fd = redirect_stdout_append(parsedLine, i+1);
+		}
+		if (fd) // redirect has occured
+		{		   
+		   dup(fd);
+		   
+		   exec(line);
 		}
 		i++;
 	}
-	line = reappendParsedLine(parsedLine);
-	//exec(line);
 	
+	line = reappendParsedLine(parsedLine);
+	
+	//exec(line);
 }
 
 void restablishStandardIO()
@@ -107,17 +109,25 @@ void restablishStandardIO()
 int scanForRedirection(char *line)
 {
    int i = 0;
+   int child;
    char **parsedLine;
-   
+      
    while(line[i])
    {
       if(line[i] == '<' || line[i] == '>') 
       {
          parsedLine = parseRedirectionOnSpaces(line);
-         //printf("parsedLine[0] = %s\n", parsedLine[0]);
-         doRedirection(&parsedLine);
-         //printf("performed redirection\n");
-         return 1;
+         child = fork();
+         if(!child)
+         {
+            doRedirection(parsedLine);
+            //printf("performed redirection\n");
+            return 1;
+         }
+         else
+         {
+            wait();
+         }
       }
       i++;
    }
