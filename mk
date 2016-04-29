@@ -8,6 +8,7 @@ cp vdiskCOPY vdisk
 ./mku init
 ./mku login
 ./mku sh
+./mku cat
 #./mku test
 
 # add my own files
